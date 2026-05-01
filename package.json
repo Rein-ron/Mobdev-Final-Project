@@ -16,7 +16,7 @@
   },
   "private": true,
   "devDependencies": {
-    "typescript": "~5.9.2",
-    "@types/react": "~19.1.10"
+    "@types/react": "~19.1.10",
+    "typescript": "~5.9.2"
   }
 }
