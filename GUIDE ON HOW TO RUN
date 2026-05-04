@@ -1,0 +1,12 @@
+#1. Install Packages
+#1. npm install --legacy-peer-deps
+
+#2. Put ServiceAccountKey into resources
+#Get the serviceAccountKey.json on messenger.
+#Directory: Backend(SBT)->src->main->resources
+
+#3. Create firebaseConfig.js
+#Create a file called firebaseConfig.js just put it besides App.jsx then get the config code on messenger.
+
+#4. How to run backend
+#Open intellij then go find MOBDEV-FINAL-PROJECT then only open Backend(SBT) to avoid any errors then go to src->main->com-StudentBudgetTracker and then run StudentBudgetTracker.java.

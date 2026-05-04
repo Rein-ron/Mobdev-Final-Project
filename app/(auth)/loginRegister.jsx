@@ -1,18 +1,34 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../firebaseConfig';
+
+
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const router = useRouter();
+
+  const handleAuth = async () => {
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+      }
+      router.replace('/(tabs)');
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Decorative Circles (Background) */}
       <View style={styles.circleTop} />
-
       <View style={styles.card}>
-        {/* Toggle Header */}
         <View style={styles.toggleContainer}>
           <TouchableOpacity onPress={() => setIsLogin(true)}>
             <Text style={[styles.toggleText, isLogin && styles.activeToggle]}>Login</Text>
@@ -22,22 +38,26 @@ const AuthScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Input Fields */}
-        <TextInput style={styles.input} placeholder="User Name" />
-        <TextInput style={styles.input} placeholder="Password" secureTextEntry />
-        {!isLogin && <TextInput style={styles.input} placeholder="Email" />}
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-        {/* Action Button */}
-        <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.replace('/(tabs)')} // go to homepage
-            >
-        <Text style={styles.buttonText}>
-            {isLogin ? 'Login' : 'Register'}
-        </Text>
+        <TouchableOpacity style={styles.button} onPress={handleAuth}>
+          <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Register'}</Text>
         </TouchableOpacity>
       </View>
-
       <View style={styles.circleBottom} />
     </SafeAreaView>
   );
