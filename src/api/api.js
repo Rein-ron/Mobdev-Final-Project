@@ -2,7 +2,7 @@ import app from '../../firebaseConfig';
 import { auth } from '../../firebaseConfig';
  const BASE_URL = 'http://10.0.2.2:8080/api'; // Android emulator
 // const BASE_URL = 'http://localhost:8080/api'; // iOS simulator
-// const BASE_URL = 'http://192.168.1.8:8080/api'; // physical device
+// const BASE_URL = 'http://192.XX.XX.XX:8080/api'; // physical device
 
 const getToken = async () => {
   try {
