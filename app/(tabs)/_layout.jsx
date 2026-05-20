@@ -9,7 +9,6 @@ export default function TabLayout() {
         tabBarInactiveTintColor: "#999",
       }}
     >
-
       <Tabs.Screen
         name="index"
         options={{
@@ -32,8 +31,6 @@ export default function TabLayout() {
         }}
       />
 
-      
-
       <Tabs.Screen
         name="transactions"
         options={{
@@ -45,6 +42,17 @@ export default function TabLayout() {
         }}
       />
 
+      {/* NEW ACCOUNT TAB */}
+      <Tabs.Screen
+        name="account"
+        options={{
+          title: "Account",
+          tabBarLabel: "Account",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { getSummary, getTransactions, getBudgets, getSavingsGoals } from '../../src/api/api';
 import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../config/firebaseConfig';
 
 const Dashboard = () => {
   const [summary, setSummary] = useState({ income: 0, expenses: 0, balance: 0 });

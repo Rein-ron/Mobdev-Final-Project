@@ -45,4 +45,4 @@ yarn-error.*
 *.iml
 
 # Secrets
-firebaseConfig.js
+config/firebaseConfig.js
