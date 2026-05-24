@@ -5,30 +5,24 @@ import { Ionicons } from "@expo/vector-icons";
 
 export default function PrivacySecurityScreen() {
   const router = useRouter();
-
-  // Settings State Toggles
   const [profileVisibility, setProfileVisibility] = useState(true);
   const [showBadges, setShowBadges] = useState(true);
 
-  // Helper template for handling legal text presentation placeholders
   const handleViewDocument = (title, content) => {
     Alert.alert(title, `${content}\n\n[Full layout text would scroll here inside production build structures]`, [{ text: "Done" }]);
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header Bar with a clean back button targeting account screen */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#1f2a44" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Privacy & Security</Text>
-        <View style={{ width: 24 }} /> {/* Visual layout balancing spacing block */}
+        <View style={{ width: 24 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* ================= PREFERENCES TOGGLES SECTION ================= */}
         <Text style={styles.sectionTitle}>Privacy Preferences</Text>
         <View style={styles.card}>
           <View style={styles.rowItem}>
@@ -58,12 +52,11 @@ export default function PrivacySecurityScreen() {
           </View>
         </View>
 
-        {/* ================= LEGAL DISCLOSURES SECTION ================= */}
         <Text style={styles.sectionTitle}>Legal & Documents</Text>
         <View style={styles.card}>
-          <TouchableOpacity 
-            style={styles.menuItem} 
-            onPress={() => handleViewDocument("Privacy Policy", "Your financial records, tracking budgets, and personal configuration profiles are secured under encryption protocols. Data endpoints are isolated explicitly for tracking app telemetry and ledger parsing logic.")}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => handleViewDocument("Privacy Policy", "Your financial records, tracking budgets, and personal configuration profiles are secured under encryption protocols.")}
           >
             <View style={styles.menuLeft}>
               <Ionicons name="document-text-outline" size={20} color="#1f2a44" />
@@ -72,9 +65,9 @@ export default function PrivacySecurityScreen() {
             <Ionicons name="chevron-forward" size={16} color="#aaa" />
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.menuItem, { borderBottomWidth: 0 }]} 
-            onPress={() => handleViewDocument("Terms of Service", "By operating this budgeting system application, you agree to local data processing rules. Financial calculations are intended for personalized monitoring purposes only.")}
+          <TouchableOpacity
+            style={[styles.menuItem, { borderBottomWidth: 0 }]}
+            onPress={() => handleViewDocument("Terms of Service", "By operating this budgeting system application, you agree to local data processing rules.")}
           >
             <View style={styles.menuLeft}>
               <Ionicons name="ribbon-outline" size={20} color="#1f2a44" />
@@ -83,7 +76,6 @@ export default function PrivacySecurityScreen() {
             <Ionicons name="chevron-forward" size={16} color="#aaa" />
           </TouchableOpacity>
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -103,5 +95,5 @@ const styles = StyleSheet.create({
   itemDescription: { fontSize: 12, color: "#888", lineHeight: 16 },
   menuItem: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 16, borderBottomWidth: 0.5, borderBottomColor: "#f0f0f0" },
   menuLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  menuItemText: { fontSize: 15, fontWeight: "500", color: "#1f2a44" }
+  menuItemText: { fontSize: 15, fontWeight: "500", color: "#1f2a44" },
 });

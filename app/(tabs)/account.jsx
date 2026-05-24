@@ -321,7 +321,7 @@ export default function AccountScreen() {
             <Ionicons name="chevron-forward" size={18} color="#aaa" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: theme.border }]} onPress={() => router.push('/privacySecurity')}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: theme.border }]} onPress={() => router.push('/(tabs)/privacySecurity')}>
             <View style={styles.menuLeft}>
               <Ionicons name="shield-checkmark-outline" size={22} color={theme.text} />
               <Text style={[styles.menuText, { color: theme.text }]}>Privacy & Security</Text>

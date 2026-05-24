@@ -19,7 +19,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
       <Tabs.Screen
         name="budgetAndSavings"
         options={{
@@ -30,7 +29,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
       <Tabs.Screen
         name="transactions"
         options={{
@@ -41,8 +39,6 @@ export default function TabLayout() {
           ),
         }}
       />
-
-      {/* NEW ACCOUNT TAB */}
       <Tabs.Screen
         name="account"
         options={{
@@ -50,6 +46,16 @@ export default function TabLayout() {
           tabBarLabel: "Account",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="privacySecurity"
+        options={{
+          title: "Privacy",
+          tabBarLabel: "Privacy",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="shield-checkmark" size={size} color={color} />
           ),
         }}
       />
