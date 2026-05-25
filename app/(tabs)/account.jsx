@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, SafeAreaView, Modal, TextInput, Switch, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, Switch, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { signOut, updateProfile, updatePassword } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
@@ -321,7 +322,7 @@ export default function AccountScreen() {
             <Ionicons name="chevron-forward" size={18} color="#aaa" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: theme.border }]} onPress={() => router.push('/(tabs)/privacySecurity')}>
+          <TouchableOpacity style={[styles.menuItem, { borderBottomColor: theme.border }]} onPress={() => router.push('/privacySecurity')}>
             <View style={styles.menuLeft}>
               <Ionicons name="shield-checkmark-outline" size={22} color={theme.text} />
               <Text style={[styles.menuText, { color: theme.text }]}>Privacy & Security</Text>

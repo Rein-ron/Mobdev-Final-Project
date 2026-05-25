@@ -1,9 +1,38 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ThemeContext = createContext();
+const THEME_STORAGE_KEY = 'sbt.darkMode';
 
 export function ThemeProvider({ children }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isThemeReady, setIsThemeReady] = useState(false);
+
+  useEffect(() => {
+    const loadTheme = async () => {
+      try {
+        const savedValue = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+        if (savedValue !== null) {
+          setIsDarkMode(savedValue === 'true');
+        }
+      } catch (error) {
+        console.log('Failed to load theme setting:', error.message);
+      } finally {
+        setIsThemeReady(true);
+      }
+    };
+
+    loadTheme();
+  }, []);
+
+  const updateDarkMode = async (value) => {
+    setIsDarkMode(value);
+    try {
+      await AsyncStorage.setItem(THEME_STORAGE_KEY, String(value));
+    } catch (error) {
+      console.log('Failed to save theme setting:', error.message);
+    }
+  };
 
   const theme = {
     bg: isDarkMode ? '#121824' : '#f4f7fb',
@@ -16,8 +45,8 @@ export function ThemeProvider({ children }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, setIsDarkMode, theme }}>
-      {children}
+    <ThemeContext.Provider value={{ isDarkMode, setIsDarkMode: updateDarkMode, isThemeReady, theme }}>
+      {isThemeReady ? children : null}
     </ThemeContext.Provider>
   );
 }

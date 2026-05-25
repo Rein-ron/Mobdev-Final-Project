@@ -7,10 +7,18 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-      tabBarActiveTintColor: "#2a6fdb",
-      tabBarInactiveTintColor: "#999",
-      tabBarStyle: { backgroundColor: theme.cardBg },
-    }}
+        headerStyle: { backgroundColor: theme.bg },
+        headerTintColor: theme.text,
+        headerTitleStyle: { color: theme.text },
+        headerShadowVisible: false,
+        sceneStyle: { backgroundColor: theme.bg },
+        tabBarActiveTintColor: "#2a6fdb",
+        tabBarInactiveTintColor: theme.subText,
+        tabBarStyle: {
+          backgroundColor: theme.cardBg,
+          borderTopColor: theme.border,
+        },
+      }}
     >
       <Tabs.Screen
         name="index"
@@ -49,16 +57,6 @@ export default function TabLayout() {
           tabBarLabel: "Account",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="privacySecurity"
-        options={{
-          title: "Privacy",
-          tabBarLabel: "Privacy",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="shield-checkmark" size={size} color={color} />
           ),
         }}
       />

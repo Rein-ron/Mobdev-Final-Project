@@ -17,8 +17,26 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleException(Exception ex) {
         log.error("API request failed", ex);
+        if (isQuotaExceeded(ex)) {
+            return ResponseEntity
+                    .status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of("error", "QuotaExceeded", "message", "Firestore quota exceeded. Try again after the quota resets or upgrade Firebase billing."));
+        }
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", ex.getClass().getSimpleName(), "message", ex.getMessage()));
+    }
+
+    private boolean isQuotaExceeded(Exception ex) {
+        Throwable current = ex;
+        while (current != null) {
+            String message = current.getMessage();
+            if (message != null && message.contains("RESOURCE_EXHAUSTED")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 }

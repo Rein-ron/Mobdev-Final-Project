@@ -51,7 +51,6 @@ export default function RootLayout() {
             presentation: 'card'
           }}
         />
-        <Stack.Screen name="detail" options={{ headerShown: true, title: 'Details' }} />
       </Stack>
     </ThemeProvider>
   );

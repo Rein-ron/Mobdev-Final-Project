@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { getSummary, getTransactions, getBudgets, getSavingsGoals } from '../../src/api/api';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [budgets, setBudgets] = useState([]);
   const [savings, setSavings] = useState([]);
   const [userReady, setUserReady] = useState(false);
+  const isFetching = useRef(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -21,9 +22,12 @@ const Dashboard = () => {
     return unsubscribe;
   }, []);
 
-  const fetchData = async () => {
-  try {
-    const [summaryData, txData, budgetData, savingsData] = await Promise.all([
+  const fetchData = useCallback(async () => {
+    if (isFetching.current) return;
+
+    isFetching.current = true;
+    try {
+      const [summaryData, txData, budgetData, savingsData] = await Promise.all([
         getSummary(),
         getTransactions(),
         getBudgets(),
@@ -35,8 +39,10 @@ const Dashboard = () => {
       setSavings(Array.isArray(savingsData) ? savingsData : []);
     } catch (error) {
       console.log('fetchData error:', error.message);
+    } finally {
+      isFetching.current = false;
     }
-  }; 
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -60,7 +66,7 @@ const Dashboard = () => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? '#121824' : '#f4f7fb' }]}>
 
-      <Text style={styles.title}>My Budget</Text>
+      <Text style={[styles.title, { color: theme.text }]}>My Budget</Text>
 
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Total Balance</Text>
@@ -69,13 +75,13 @@ const Dashboard = () => {
 
       <View style={styles.row}>
         <View style={[styles.statCard, { borderLeftColor: "#2ecc71", backgroundColor: theme.cardBg }]}>
-          <Text style={styles.statLabel}>Income</Text>
+          <Text style={[styles.statLabel, { color: theme.subText }]}>Income</Text>
           <Text style={[styles.statAmount, { color: "#2ecc71" }]}>
             ₱{(summary.income || 0).toFixed(2)}
           </Text>
         </View>
         <View style={[styles.statCard, { borderLeftColor: "#2ecc71", backgroundColor: theme.cardBg }]}>
-          <Text style={styles.statLabel}>Expenses</Text>
+          <Text style={[styles.statLabel, { color: theme.subText }]}>Expenses</Text>
           <Text style={[styles.statAmount, { color: "#e74c3c" }]}>
             ₱{(summary.expenses || 0).toFixed(2)}
           </Text>
@@ -84,7 +90,7 @@ const Dashboard = () => {
 
       {budgets.length > 0 && (
         <View style={[styles.card, { borderLeftColor: "#2ecc71", backgroundColor: theme.cardBg }]}>
-          <Text style={styles.sectionTitle}>Budget Tracking</Text>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Budget Tracking</Text>
           {budgets.map((b, i) => {
             const spent = getSpent(b.category);
             const percent = Math.min((spent / b.limit) * 100, 100);
@@ -92,8 +98,8 @@ const Dashboard = () => {
             return (
               <View key={i} style={styles.budgetRow}>
                 <View style={styles.budgetTop}>
-                  <Text style={styles.budgetCategory}>{b.category}</Text>
-                  <Text style={styles.budgetAmount}>
+                  <Text style={[styles.budgetCategory, { color: theme.text }]}>{b.category}</Text>
+                  <Text style={[styles.budgetAmount, { color: theme.subText }]}>
                     ₱{spent.toFixed(2)} / ₱{b.limit.toFixed(2)}
                   </Text>
                 </View>
@@ -111,14 +117,14 @@ const Dashboard = () => {
 
       {savings.length > 0 && (
         <View style={[styles.card, { borderLeftColor: "#2ecc71", backgroundColor: theme.cardBg }]}>
-          <Text style={styles.sectionTitle}>Savings Goals</Text>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Savings Goals</Text>
           {savings.map((s, i) => {
             const percent = Math.min((s.saved / s.target) * 100, 100);
             return (
               <View key={i} style={styles.budgetRow}>
                 <View style={styles.budgetTop}>
-                  <Text style={styles.budgetCategory}>{s.name}</Text>
-                  <Text style={styles.budgetAmount}>
+                  <Text style={[styles.budgetCategory, { color: theme.text }]}>{s.name}</Text>
+                  <Text style={[styles.budgetAmount, { color: theme.subText }]}>
                     ₱{s.saved.toFixed(2)} / ₱{s.target.toFixed(2)}
                   </Text>
                 </View>
@@ -134,14 +140,14 @@ const Dashboard = () => {
         </View>
       )}
 
-      <Text style={styles.sectionTitle}>Recent Transactions</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Recent Transactions</Text>
       <View style={[styles.card, { borderLeftColor: "#2ecc71", backgroundColor: theme.cardBg }]}>
         {recent.length > 0 ? (
           recent.map((t, i) => (
-            <View key={i} style={[styles.txRow, i < recent.length - 1 && styles.txBorder]}>
+            <View key={i} style={[styles.txRow, i < recent.length - 1 && styles.txBorder, { borderBottomColor: theme.border }]}>
               <View>
-                <Text style={styles.txCategory}>{t.category}</Text>
-                <Text style={styles.txDate}>{t.date}</Text>
+                <Text style={[styles.txCategory, { color: theme.text }]}>{t.category}</Text>
+                <Text style={[styles.txDate, { color: theme.subText }]}>{t.date}</Text>
               </View>
               <Text style={t.type === "income" ? styles.income : styles.expense}>
                 {t.type === "income" ? "+" : "-"}₱{t.amount.toFixed(2)}
@@ -149,7 +155,7 @@ const Dashboard = () => {
             </View>
           ))
         ) : (
-          <Text style={styles.muted}>No transactions yet</Text>
+          <Text style={[styles.muted, { color: theme.subText }]}>No transactions yet</Text>
         )}
       </View>
 

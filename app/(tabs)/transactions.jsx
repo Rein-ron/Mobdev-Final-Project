@@ -73,12 +73,12 @@ export default function Transactions() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? '#121824' : '#f4f7fb' }]}>
-        <Text style={styles.title}>Transactions</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Transactions</Text>
 
         <View style={styles.filterRow}>
           {['all', 'income', 'expense'].map(f => (
             <TouchableOpacity key={f} onPress={() => setFilter(f)}>
-              <Text style={[styles.filter, filter === f && styles.activeFilter]}>
+              <Text style={[styles.filter, { color: theme.subText }, filter === f && styles.activeFilter]}>
                 {f.charAt(0).toUpperCase() + f.slice(1)}
               </Text>
             </TouchableOpacity>
@@ -91,13 +91,13 @@ export default function Transactions() {
             .map((t) => (
               <Card key={t.id}>
                 <View style={styles.row}>
-                  <Text style={styles.category}>{t.category}</Text>
+                  <Text style={[styles.category, { color: theme.text }]}>{t.category}</Text>
                   <Text style={[styles.amount, t.type === "income" ? styles.income : styles.expense]}>
                     {t.type === "income" ? "+" : "-"} ₱{t.amount.toFixed(2)}
                   </Text>
                 </View>
-                <Text style={styles.date}>{t.date}</Text>
-                <Text style={styles.desc}>{t.description}</Text>
+                <Text style={[styles.date, { color: theme.subText }]}>{t.date}</Text>
+                <Text style={[styles.desc, { color: theme.subText }]}>{t.description}</Text>
                 <View style={styles.actionRow}>
                   <TouchableOpacity onPress={() => handleDelete(t.id)}>
                     <Text style={styles.delete}>Delete</Text>
@@ -107,7 +107,7 @@ export default function Transactions() {
             ))
         ) : (
           <Card>
-            <Text style={styles.muted}>No transactions found</Text>
+            <Text style={[styles.muted, { color: theme.subText }]}>No transactions found</Text>
           </Card>
         )}
       </ScrollView>
@@ -120,41 +120,44 @@ export default function Transactions() {
       {/* Add Transaction Modal */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Add Transaction</Text>
+          <View style={[styles.modalCard, { backgroundColor: theme.cardBg }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Add Transaction</Text>
 
             {/* Type Toggle */}
             <View style={styles.typeRow}>
               <TouchableOpacity
-                style={[styles.typeBtn, type === "expense" && styles.typeBtnActive]}
+                style={[styles.typeBtn, { borderColor: theme.inputBorder }, type === "expense" && styles.typeBtnActive]}
                 onPress={() => setType("expense")}
               >
-                <Text style={[styles.typeBtnText, type === "expense" && styles.typeBtnTextActive]}>Expense</Text>
+                <Text style={[styles.typeBtnText, { color: theme.subText }, type === "expense" && styles.typeBtnTextActive]}>Expense</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.typeBtn, type === "income" && styles.typeBtnActive]}
+                style={[styles.typeBtn, { borderColor: theme.inputBorder }, type === "income" && styles.typeBtnActive]}
                 onPress={() => setType("income")}
               >
-                <Text style={[styles.typeBtnText, type === "income" && styles.typeBtnTextActive]}>Income</Text>
+                <Text style={[styles.typeBtnText, { color: theme.subText }, type === "income" && styles.typeBtnTextActive]}>Income</Text>
               </TouchableOpacity>
             </View>
 
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
               placeholder="Category (e.g. food, transport)"
+              placeholderTextColor={theme.subText}
               value={category}
               onChangeText={setCategory}
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
               placeholder="Amount"
+              placeholderTextColor={theme.subText}
               value={amount}
               onChangeText={setAmount}
               keyboardType="numeric"
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
               placeholder="Description"
+              placeholderTextColor={theme.subText}
               value={description}
               onChangeText={setDescription}
             />
