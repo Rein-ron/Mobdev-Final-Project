@@ -19,13 +19,7 @@ const Dashboard = () => {
     return unsubscribe;
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (userReady) fetchData();
-    }, [userReady])
-  );
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [summaryData, txData, budgetData, savingsData] = await Promise.all([
         getSummary(),
@@ -33,54 +27,59 @@ const Dashboard = () => {
         getBudgets(),
         getSavingsGoals()
       ]);
-      setSummary(summaryData);
-      setTransactions(txData);
-      setBudgets(budgetData);
-      setSavings(savingsData);
+      setSummary(summaryData || { income: 0, expenses: 0, balance: 0 });
+      setTransactions(Array.isArray(txData) ? txData : []);
+      setBudgets(Array.isArray(budgetData) ? budgetData : []);
+      setSavings(Array.isArray(savingsData) ? savingsData : []);
     } catch (error) {
       console.log('fetchData error:', error.message);
-      Alert.alert('Error', 'Failed to load data');
     }
-  };
+  }, []);
 
-  const recent = [...transactions]
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5);
+  useFocusEffect(
+    useCallback(() => {
+      if (userReady) fetchData();
+    }, [userReady, fetchData])
+  );
+
+  const recent = Array.isArray(transactions)
+    ? [...transactions]
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5)
+    : [];
 
   const getSpent = (category) =>
-    transactions
-      .filter(t => t.type === "expense" && t.category === category)
-      .reduce((sum, t) => sum + t.amount, 0);
+    Array.isArray(transactions)
+      ? transactions
+          .filter(t => t.type === "expense" && t.category === category)
+          .reduce((sum, t) => sum + t.amount, 0)
+      : 0;
 
   return (
     <ScrollView style={styles.container}>
 
-      {/* Header */}
       <Text style={styles.title}>My Budget</Text>
 
-      {/* Balance Card */}
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Total Balance</Text>
-        <Text style={styles.balanceAmount}>₱{summary.balance.toFixed(2)}</Text>
+        <Text style={styles.balanceAmount}>₱{(summary.balance || 0).toFixed(2)}</Text>
       </View>
 
-      {/* Income & Expense Row */}
       <View style={styles.row}>
         <View style={[styles.statCard, { borderLeftColor: "#2ecc71" }]}>
           <Text style={styles.statLabel}>Income</Text>
           <Text style={[styles.statAmount, { color: "#2ecc71" }]}>
-            ₱{summary.income.toFixed(2)}
+            ₱{(summary.income || 0).toFixed(2)}
           </Text>
         </View>
         <View style={[styles.statCard, { borderLeftColor: "#e74c3c" }]}>
           <Text style={styles.statLabel}>Expenses</Text>
           <Text style={[styles.statAmount, { color: "#e74c3c" }]}>
-            ₱{summary.expenses.toFixed(2)}
+            ₱{(summary.expenses || 0).toFixed(2)}
           </Text>
         </View>
       </View>
 
-      {/* Budget Tracking */}
       {budgets.length > 0 && (
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Budget Tracking</Text>
@@ -108,7 +107,6 @@ const Dashboard = () => {
         </View>
       )}
 
-      {/* Savings Goals */}
       {savings.length > 0 && (
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Savings Goals</Text>
@@ -134,7 +132,6 @@ const Dashboard = () => {
         </View>
       )}
 
-      {/* Recent Transactions */}
       <Text style={styles.sectionTitle}>Recent Transactions</Text>
       <View style={styles.card}>
         {recent.length > 0 ? (
@@ -161,19 +158,15 @@ const Dashboard = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f4f7fb", padding: 16 },
   title: { fontSize: 26, fontWeight: "bold", color: "#1f2a44", marginBottom: 16 },
-
   balanceCard: { backgroundColor: "#1f2a44", borderRadius: 16, padding: 24, marginBottom: 16, alignItems: "center" },
   balanceLabel: { fontSize: 13, color: "#aaa", marginBottom: 8 },
   balanceAmount: { fontSize: 36, fontWeight: "bold", color: "#fff" },
-
   row: { flexDirection: "row", gap: 12, marginBottom: 12 },
   statCard: { flex: 1, backgroundColor: "#fff", borderRadius: 12, padding: 16, borderLeftWidth: 4, elevation: 2 },
   statLabel: { fontSize: 12, color: "#888", marginBottom: 6 },
   statAmount: { fontSize: 18, fontWeight: "bold" },
-
   card: { backgroundColor: "#fff", borderRadius: 16, padding: 16, elevation: 2, marginBottom: 12 },
   sectionTitle: { fontSize: 16, fontWeight: "bold", color: "#1f2a44", marginBottom: 12 },
-
   budgetRow: { marginBottom: 14 },
   budgetTop: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
   budgetCategory: { fontSize: 13, fontWeight: "600", color: "#1f2a44", textTransform: "capitalize" },
@@ -181,7 +174,6 @@ const styles = StyleSheet.create({
   barBackground: { height: 6, backgroundColor: "#f0f0f0", borderRadius: 3, overflow: "hidden", marginBottom: 4 },
   barFill: { height: 6, borderRadius: 3 },
   budgetStatus: { fontSize: 11, fontWeight: "600" },
-
   txRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10 },
   txBorder: { borderBottomWidth: 0.5, borderBottomColor: "#f0f0f0" },
   txCategory: { fontSize: 14, fontWeight: "600", color: "#1f2a44" },
