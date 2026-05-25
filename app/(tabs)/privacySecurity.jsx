@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from '../../context/ThemeContext';
 
 export default function PrivacySecurityScreen() {
   const router = useRouter();
+  const { isDarkMode } = useTheme();
   const [profileVisibility, setProfileVisibility] = useState(true);
   const [showBadges, setShowBadges] = useState(true);
 
@@ -22,7 +24,8 @@ export default function PrivacySecurityScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+ 
+      <ScrollView contentContainerStyle={[styles.scrollContent, { backgroundColor: isDarkMode ? '#121824' : '#f4f7fb' }]}>
         <Text style={styles.sectionTitle}>Privacy Preferences</Text>
         <View style={styles.card}>
           <View style={styles.rowItem}>

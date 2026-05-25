@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Modal } from "react-native";
 import { getTransactions, deleteTransaction, addTransaction } from '../../src/api/api';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function Transactions() {
+  const { isDarkMode, theme } = useTheme();
   const [transactions, setTransactions] = useState([]);
   const [filter, setFilter] = useState("all");
   const [modalVisible, setModalVisible] = useState(false);
@@ -16,10 +18,11 @@ export default function Transactions() {
   }, []);
 
   const fetchTransactions = async () => {
-    try {
+  try {
       const data = await getTransactions();
-      setTransactions(data);
+      setTransactions(Array.isArray(data) ? data : []);
     } catch (error) {
+      setTransactions([]);
       Alert.alert('Error', 'Failed to load transactions');
     }
   };
@@ -64,12 +67,12 @@ export default function Transactions() {
   });
 
   const Card = ({ children }) => (
-    <View style={styles.card}>{children}</View>
+    <View style={[styles.card, { backgroundColor: theme.cardBg }]}>{children}</View>
   );
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
+      <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? '#121824' : '#f4f7fb' }]}>
         <Text style={styles.title}>Transactions</Text>
 
         <View style={styles.filterRow}>

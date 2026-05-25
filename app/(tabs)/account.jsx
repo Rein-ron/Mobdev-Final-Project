@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { signOut, updateProfile, updatePassword } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from '../../context/ThemeContext';
 
 export default function AccountScreen() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function AccountScreen() {
 
   // --- STATE MANAGEMENT ---
   // System Configurations & Core Layout Toggles
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, setIsDarkMode } = useTheme();
   const [selectedLanguage, setSelectedLanguage] = useState('English (US)');
   const [selectedTimeZone, setSelectedTimeZone] = useState('GMT+08:00 (PST)');
 
@@ -125,8 +126,7 @@ export default function AccountScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.bg }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-
+        <ScrollView showsVerticalScrollIndicator={false} style={[styles.container, { backgroundColor: isDarkMode ? '#121824' : '#f4f7fb' }]}>
         {/* Profile Header Card */}
         <View style={styles.headerCard}>
           <View style={styles.avatarCircle}>

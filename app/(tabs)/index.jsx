@@ -4,8 +4,10 @@ import { useFocusEffect } from "expo-router";
 import { getSummary, getTransactions, getBudgets, getSavingsGoals } from '../../src/api/api';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
+import { useTheme } from '../../context/ThemeContext';
 
 const Dashboard = () => {
+  const { isDarkMode, theme } = useTheme();
   const [summary, setSummary] = useState({ income: 0, expenses: 0, balance: 0 });
   const [transactions, setTransactions] = useState([]);
   const [budgets, setBudgets] = useState([]);
@@ -19,22 +21,22 @@ const Dashboard = () => {
     return unsubscribe;
   }, []);
 
-  const fetchData = useCallback(async () => {
-    try {
-      const [summaryData, txData, budgetData, savingsData] = await Promise.all([
+  const fetchData = async () => {
+  try {
+    const [summaryData, txData, budgetData, savingsData] = await Promise.all([
         getSummary(),
         getTransactions(),
         getBudgets(),
         getSavingsGoals()
       ]);
-      setSummary(summaryData || { income: 0, expenses: 0, balance: 0 });
+      setSummary(summaryData ?? { income: 0, expenses: 0, balance: 0 });
       setTransactions(Array.isArray(txData) ? txData : []);
       setBudgets(Array.isArray(budgetData) ? budgetData : []);
       setSavings(Array.isArray(savingsData) ? savingsData : []);
     } catch (error) {
       console.log('fetchData error:', error.message);
     }
-  }, []);
+  }; 
 
   useFocusEffect(
     useCallback(() => {
@@ -56,7 +58,7 @@ const Dashboard = () => {
       : 0;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? '#121824' : '#f4f7fb' }]}>
 
       <Text style={styles.title}>My Budget</Text>
 
@@ -66,13 +68,13 @@ const Dashboard = () => {
       </View>
 
       <View style={styles.row}>
-        <View style={[styles.statCard, { borderLeftColor: "#2ecc71" }]}>
+        <View style={[styles.statCard, { borderLeftColor: "#2ecc71", backgroundColor: theme.cardBg }]}>
           <Text style={styles.statLabel}>Income</Text>
           <Text style={[styles.statAmount, { color: "#2ecc71" }]}>
             ₱{(summary.income || 0).toFixed(2)}
           </Text>
         </View>
-        <View style={[styles.statCard, { borderLeftColor: "#e74c3c" }]}>
+        <View style={[styles.statCard, { borderLeftColor: "#2ecc71", backgroundColor: theme.cardBg }]}>
           <Text style={styles.statLabel}>Expenses</Text>
           <Text style={[styles.statAmount, { color: "#e74c3c" }]}>
             ₱{(summary.expenses || 0).toFixed(2)}
@@ -81,7 +83,7 @@ const Dashboard = () => {
       </View>
 
       {budgets.length > 0 && (
-        <View style={styles.card}>
+        <View style={[styles.card, { borderLeftColor: "#2ecc71", backgroundColor: theme.cardBg }]}>
           <Text style={styles.sectionTitle}>Budget Tracking</Text>
           {budgets.map((b, i) => {
             const spent = getSpent(b.category);
@@ -108,7 +110,7 @@ const Dashboard = () => {
       )}
 
       {savings.length > 0 && (
-        <View style={styles.card}>
+        <View style={[styles.card, { borderLeftColor: "#2ecc71", backgroundColor: theme.cardBg }]}>
           <Text style={styles.sectionTitle}>Savings Goals</Text>
           {savings.map((s, i) => {
             const percent = Math.min((s.saved / s.target) * 100, 100);
@@ -133,7 +135,7 @@ const Dashboard = () => {
       )}
 
       <Text style={styles.sectionTitle}>Recent Transactions</Text>
-      <View style={styles.card}>
+      <View style={[styles.card, { borderLeftColor: "#2ecc71", backgroundColor: theme.cardBg }]}>
         {recent.length > 0 ? (
           recent.map((t, i) => (
             <View key={i} style={[styles.txRow, i < recent.length - 1 && styles.txBorder]}>

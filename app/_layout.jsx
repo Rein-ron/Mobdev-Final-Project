@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
 import { View, ActivityIndicator } from 'react-native';
+import { ThemeProvider } from '../context/ThemeContext';
 
 export default function RootLayout() {
   const [user, setUser] = useState(undefined);
@@ -39,17 +40,19 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen
-        name="privacySecurity"
-        options={{
-          headerShown: false,
-          presentation: 'card'
-        }}
-      />
-      <Stack.Screen name="detail" options={{ headerShown: true, title: 'Details' }} />
-    </Stack>
+    <ThemeProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="privacySecurity"
+          options={{
+            headerShown: false,
+            presentation: 'card'
+          }}
+        />
+        <Stack.Screen name="detail" options={{ headerShown: true, title: 'Details' }} />
+      </Stack>
+    </ThemeProvider>
   );
 }
