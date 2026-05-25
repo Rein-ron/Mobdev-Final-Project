@@ -3,12 +3,12 @@ import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBrmlEJFtjP2vzmOQHj9-YMhlWGSf7ZkSE",
-  authDomain: "sbt-database-54267.firebaseapp.com",
-  projectId: "sbt-database-54267",
-  storageBucket: "sbt-database-54267.firebasestorage.app",
-  messagingSenderId: "381445075009",
-  appId: "1:381445075009:web:5ded684e2122ac367a16c0"
+  apiKey: "AIzaSyAcLvI3xNa4Q8yb38oyV_GrDVYrhszw5jY",
+  authDomain: "student-budget-tracker-ece83.firebaseapp.com",
+  projectId: "student-budget-tracker-ece83",
+  storageBucket: "student-budget-tracker-ece83.firebasestorage.app",
+  messagingSenderId: "112807696395",
+  appId: "1:112807696395:web:1f325dffc79c1d5e514f0e"
 };
 
 const app = initializeApp(firebaseConfig);
