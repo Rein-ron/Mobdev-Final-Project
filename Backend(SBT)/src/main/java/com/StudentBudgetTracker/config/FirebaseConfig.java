@@ -23,15 +23,17 @@ public class FirebaseConfig {
 
     @PostConstruct
     public void initialize() throws IOException {
+        System.out.println("FIREBASE_CREDENTIALS is null: " + (firebaseCredentials == null));
+        
         GoogleCredentials credentials;
 
         if (firebaseCredentials != null && !firebaseCredentials.isEmpty()) {
-           
             byte[] decoded = Base64.getDecoder().decode(firebaseCredentials);
             credentials = GoogleCredentials.fromStream(new ByteArrayInputStream(decoded));
-        } else {
-          
+        } else if (serviceAccount != null) {
             credentials = GoogleCredentials.fromStream(serviceAccount.getInputStream());
+        } else {
+            throw new IllegalStateException("No Firebase credentials found. Set FIREBASE_CREDENTIALS in Railway.");
         }
 
         FirebaseOptions options = FirebaseOptions.builder()
@@ -41,5 +43,4 @@ public class FirebaseConfig {
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseApp.initializeApp(options);
         }
-    }
 }
