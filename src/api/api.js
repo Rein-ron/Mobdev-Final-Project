@@ -2,7 +2,7 @@ import app from '../../config/firebaseConfig';
 import { auth } from '../../config/firebaseConfig';
 // const BASE_URL = 'http://10.0.2.2:8080/api'; // Android emulator
 // const BASE_URL = 'http://localhost:8080/api'; // iOS simulator
-const BASE_URL = 'https://mobdev-final-project-production.up.railway.app'; // physical device
+const BASE_URL = 'https://mobdev-final-project-production.up.railway.app/api'; // physical device
 
 const getToken = async () => {
   if (!auth.currentUser) throw new Error('No user logged in');
