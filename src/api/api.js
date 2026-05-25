@@ -1,16 +1,34 @@
-import app from '../../config/firebaseConfig';
 import { auth } from '../../config/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 // const BASE_URL = 'http://10.0.2.2:8080/api'; // Android emulator
 // const BASE_URL = 'http://localhost:8080/api'; // iOS simulator
-const BASE_URL = 'https://mobdev-final-project-production.up.railway.app/api'; // physical device
+const BASE_URL = 'https://mobdev-final-project-production.up.railway.app/api'; // physical device / APK
 
 const getToken = async () => {
-  if (!auth.currentUser) throw new Error('No user logged in');
-  return auth.currentUser.getIdToken();
+  const user = auth.currentUser ?? await new Promise((resolve) => {
+    let unsubscribe = () => {};
+    const timeout = setTimeout(() => {
+      unsubscribe();
+      resolve(null);
+    }, 5000);
+
+    unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      clearTimeout(timeout);
+      unsubscribe();
+      resolve(currentUser);
+    });
+  });
+
+  if (!user) throw new Error('No user logged in');
+  return user.getIdToken();
 };
 
-const safeJson = async (res, fallback) => {
-  if (!res.ok) return fallback;
+const safeJson = async (res, fallback, endpoint) => {
+  if (!res.ok) {
+    const message = await res.text().catch(() => '');
+    console.log(`API request failed (${endpoint}): ${res.status} ${message}`);
+    return fallback;
+  }
   try {
     const data = await res.json();
     return data ?? fallback;
@@ -24,7 +42,7 @@ export const getTransactions = async () => {
   const res = await fetch(`${BASE_URL}/transactions`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return safeJson(res, []);
+  return safeJson(res, [], 'GET /transactions');
 };
 
 export const addTransaction = async (transaction) => {
@@ -50,7 +68,7 @@ export const getSummary = async () => {
   const res = await fetch(`${BASE_URL}/summary`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return safeJson(res, { income: 0, expenses: 0, balance: 0 });
+  return safeJson(res, { income: 0, expenses: 0, balance: 0 }, 'GET /summary');
 };
 
 export const getBudgets = async () => {
@@ -58,7 +76,7 @@ export const getBudgets = async () => {
   const res = await fetch(`${BASE_URL}/budgets`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return safeJson(res, []);
+  return safeJson(res, [], 'GET /budgets');
 };
 
 export const addBudget = async (budget) => {
@@ -76,7 +94,7 @@ export const getSavingsGoals = async () => {
   const res = await fetch(`${BASE_URL}/savings`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return safeJson(res, []);
+  return safeJson(res, [], 'GET /savings');
 };
 
 export const addSavingsGoal = async (goal) => {
