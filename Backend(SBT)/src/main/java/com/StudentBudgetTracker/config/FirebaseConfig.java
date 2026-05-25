@@ -21,6 +21,9 @@ public class FirebaseConfig {
     @Value("${firebase.service-account:#{null}}")
     private Resource serviceAccount;
 
+    @Value("${firebase.project-id}")
+    private String projectId;
+
     @PostConstruct
     public void initialize() throws IOException {
         System.out.println("FIREBASE_CREDENTIALS is null: " + (firebaseCredentials == null));
@@ -38,6 +41,7 @@ public class FirebaseConfig {
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(credentials)
+                .setProjectId(projectId)
                 .build();
 
         if (FirebaseApp.getApps().isEmpty()) {

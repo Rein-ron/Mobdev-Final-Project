@@ -2,10 +2,10 @@ package com.StudentBudgetTracker.repository;
 
 import com.StudentBudgetTracker.model.Transaction;
 import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.Query;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Repository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,11 +29,11 @@ public class TransactionRepository {
     public List<Transaction> findByUserId(String userId) throws Exception {
         return getDb().collection(COLLECTION)
             .whereEqualTo("userId", userId)
-            .orderBy("date", Query.Direction.DESCENDING)
             .get().get()
             .getDocuments()
             .stream()
             .map(d -> d.toObject(Transaction.class))
+            .sorted(Comparator.comparing(Transaction::getDate, Comparator.nullsLast(String::compareTo)).reversed())
             .collect(Collectors.toList());
     }
 
