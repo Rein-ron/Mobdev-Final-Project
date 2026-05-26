@@ -21,11 +21,11 @@ public class SavingsGoalService {
         return repo.findByUserId(userId);
     }
 
-    public void updateSaved(String id, double newSaved) throws Exception {
-        repo.update(id, newSaved);
+    public void updateSaved(String id, String userId, double newSaved) throws Exception {
+        repo.update(id, userId, newSaved);
     }
 
-    public void deleteSavingsGoal(String id) throws Exception {
-        repo.delete(id);
+    public void deleteSavingsGoal(String id, String userId) throws Exception {
+        repo.delete(id, userId);
     }
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { ActivityIndicator, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
@@ -11,18 +11,28 @@ const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const handleAuth = async () => {
+    if (isSubmitting) return;
+
+    if (!email.trim() || !password) {
+      Alert.alert('Error', 'Please enter your email and password.');
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(auth, email.trim(), password);
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        await createUserWithEmailAndPassword(auth, email.trim(), password);
       }
-      router.replace('/(tabs)');
     } catch (error) {
       Alert.alert('Error', error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -55,8 +65,16 @@ const AuthScreen = () => {
           secureTextEntry
         />
 
-        <TouchableOpacity style={styles.button} onPress={handleAuth}>
-          <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Register'}</Text>
+        <TouchableOpacity
+          style={[styles.button, isSubmitting && styles.buttonDisabled]}
+          onPress={handleAuth}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Register'}</Text>
+          )}
         </TouchableOpacity>
       </View>
       <View style={styles.circleBottom} />
@@ -74,6 +92,7 @@ const styles = StyleSheet.create({
   activeToggle: { color: '#104d80', fontWeight: 'bold', borderBottomWidth: 2, borderBottomColor: '#104d80' },
   input: { backgroundColor: '#f9f9f9', padding: 15, borderRadius: 10, marginBottom: 15, borderWidth: 1, borderColor: '#eee' },
   button: { backgroundColor: '#104d80', padding: 15, borderRadius: 25, alignItems: 'center' },
+  buttonDisabled: { opacity: 0.7 },
   buttonText: { color: '#fff', fontWeight: 'bold' }
 });
 

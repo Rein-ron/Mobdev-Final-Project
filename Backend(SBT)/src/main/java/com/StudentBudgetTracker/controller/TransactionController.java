@@ -32,8 +32,10 @@ public class TransactionController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) throws Exception {
-        service.deleteTransaction(id);
+    public ResponseEntity<Void> delete(@PathVariable String id,
+                                       HttpServletRequest request) throws Exception {
+        String userId = (String) request.getAttribute("uid");
+        service.deleteTransaction(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

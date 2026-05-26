@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from "react-native";
 import { useFocusEffect } from "expo-router";
-import { getTransactions, getBudgets, getSavingsGoals, addBudget, addSavingsGoal, updateSavingsGoal } from '../../src/api/api';
+import { getTransactions, getBudgets, getSavingsGoals, addBudget, addSavingsGoal, updateSavingsGoal, addTransaction } from '../../src/api/api';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function BudgetAndSavings() {
@@ -9,6 +9,8 @@ export default function BudgetAndSavings() {
   const [transactions, setTransactions] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [savingsGoals, setSavingsGoals] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [budgetModal, setBudgetModal] = useState(false);
   const [savingsModal, setSavingsModal] = useState(false);
@@ -26,11 +28,18 @@ export default function BudgetAndSavings() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchTransactions();
-      fetchBudgets();
-      fetchSavings();
+      fetchData();
     }, [])
   );
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      await Promise.all([fetchTransactions(), fetchBudgets(), fetchSavings()]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchTransactions = async () => {
     try {
@@ -68,6 +77,7 @@ export default function BudgetAndSavings() {
       Alert.alert('Error', 'Budget limit must be a number');
       return;
     }
+    setIsSaving(true);
     try {
       await addBudget({ category: budgetCategory, limit: parseFloat(budgetLimit) });
       setBudgetCategory("");
@@ -76,6 +86,8 @@ export default function BudgetAndSavings() {
       fetchBudgets();
     } catch (error) {
       Alert.alert('Error', 'Failed to add budget');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -88,15 +100,29 @@ export default function BudgetAndSavings() {
       Alert.alert('Error', 'Amounts must be numbers');
       return;
     }
+    setIsSaving(true);
     try {
-      await addSavingsGoal({ name: savingsName, target: parseFloat(savingsTarget), saved: parseFloat(savingsSaved) });
+      const initialSaved = parseFloat(savingsSaved);
+      await addSavingsGoal({ name: savingsName, target: parseFloat(savingsTarget), saved: initialSaved });
+      if (initialSaved > 0) {
+        await addTransaction({
+          type: "expense",
+          category: "savings",
+          amount: initialSaved,
+          description: `Initial savings for ${savingsName}`,
+          date: new Date().toISOString().split('T')[0],
+        });
+      }
       setSavingsName("");
       setSavingsTarget("");
       setSavingsSaved("");
       setSavingsModal(false);
       fetchSavings();
+      fetchTransactions();
     } catch (error) {
       Alert.alert('Error', 'Failed to add savings goal');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -105,15 +131,27 @@ export default function BudgetAndSavings() {
       Alert.alert('Error', 'Please enter a valid amount');
       return;
     }
+    setIsSaving(true);
     try {
       const goal = savingsGoals[selectedSavingsIndex];
-      const newSaved = goal.saved + parseFloat(additionalSaved);
+      const amountToAdd = parseFloat(additionalSaved);
+      const newSaved = goal.saved + amountToAdd;
       await updateSavingsGoal(goal.id, newSaved);
+      await addTransaction({
+        type: "expense",
+        category: "savings",
+        amount: amountToAdd,
+        description: `Added to savings: ${goal.name}`,
+        date: new Date().toISOString().split('T')[0],
+      });
       setAdditionalSaved("");
       setUpdateModal(false);
       fetchSavings();
+      fetchTransactions();
     } catch (error) {
       Alert.alert('Error', 'Failed to update savings');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -145,7 +183,10 @@ export default function BudgetAndSavings() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
       <ScrollView style={[styles.container, { backgroundColor: theme.bg }]}>
-        <Text style={[styles.title, { color: theme.text }]}>Budget and Savings</Text>
+        <View style={styles.titleRow}>
+          <Text style={[styles.title, { color: theme.text }]}>Budget and Savings</Text>
+          {isLoading && <Text style={[styles.refreshText, { color: theme.subText }]}>Refreshing...</Text>}
+        </View>
 
         <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Budget Tracking</Text>
@@ -171,7 +212,7 @@ export default function BudgetAndSavings() {
             </Card>
           ))
         ) : (
-          <Card><Text style={[styles.muted, { color: theme.subText }]}>No budgets set</Text></Card>
+          <Card><Text style={[styles.muted, { color: theme.subText }]}>{isLoading ? "Loading budgets..." : "No budgets set"}</Text></Card>
         )}
 
         <View style={styles.sectionHeader}>
@@ -197,7 +238,7 @@ export default function BudgetAndSavings() {
             </Card>
           ))
         ) : (
-          <Card><Text style={[styles.muted, { color: theme.subText }]}>No savings goals yet</Text></Card>
+          <Card><Text style={[styles.muted, { color: theme.subText }]}>{isLoading ? "Loading savings goals..." : "No savings goals yet"}</Text></Card>
         )}
       </ScrollView>
 
@@ -220,8 +261,8 @@ export default function BudgetAndSavings() {
               onChangeText={setBudgetLimit}
               keyboardType="numeric"
             />
-            <TouchableOpacity style={styles.submitBtn} onPress={handleAddBudget}>
-              <Text style={styles.submitText}>Add Budget</Text>
+            <TouchableOpacity style={[styles.submitBtn, isSaving && styles.disabledBtn]} onPress={handleAddBudget} disabled={isSaving}>
+              <Text style={styles.submitText}>{isSaving ? "Adding..." : "Add Budget"}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setBudgetModal(false)}>
               <Text style={[styles.cancelText, { color: theme.subText }]}>Cancel</Text>
@@ -257,8 +298,8 @@ export default function BudgetAndSavings() {
               onChangeText={setSavingsSaved}
               keyboardType="numeric"
             />
-            <TouchableOpacity style={styles.submitBtn} onPress={handleAddSavings}>
-              <Text style={styles.submitText}>Add Goal</Text>
+            <TouchableOpacity style={[styles.submitBtn, isSaving && styles.disabledBtn]} onPress={handleAddSavings} disabled={isSaving}>
+              <Text style={styles.submitText}>{isSaving ? "Adding..." : "Add Goal"}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setSavingsModal(false)}>
               <Text style={[styles.cancelText, { color: theme.subText }]}>Cancel</Text>
@@ -279,8 +320,8 @@ export default function BudgetAndSavings() {
               onChangeText={setAdditionalSaved}
               keyboardType="numeric"
             />
-            <TouchableOpacity style={styles.submitBtn} onPress={handleUpdateSavings}>
-              <Text style={styles.submitText}>Update</Text>
+            <TouchableOpacity style={[styles.submitBtn, isSaving && styles.disabledBtn]} onPress={handleUpdateSavings} disabled={isSaving}>
+              <Text style={styles.submitText}>{isSaving ? "Updating..." : "Update"}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setUpdateModal(false)}>
               <Text style={[styles.cancelText, { color: theme.subText }]}>Cancel</Text>
@@ -294,7 +335,9 @@ export default function BudgetAndSavings() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
-  title: { fontSize: 28, fontWeight: "bold", marginBottom: 12 },
+  titleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  title: { fontSize: 28, fontWeight: "bold" },
+  refreshText: { fontSize: 12, fontWeight: "600" },
   sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 15, marginBottom: 10 },
   sectionTitle: { fontSize: 18, fontWeight: "bold" },
   addBtn: { backgroundColor: "#2a6fdb", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
@@ -319,6 +362,7 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
   input: { padding: 14, borderRadius: 10, marginBottom: 12, borderWidth: 1 },
   submitBtn: { backgroundColor: "#2a6fdb", padding: 15, borderRadius: 25, alignItems: "center", marginBottom: 10 },
+  disabledBtn: { opacity: 0.7 },
   submitText: { color: "#fff", fontWeight: "bold" },
   cancelText: { textAlign: "center", marginTop: 4 },
 });

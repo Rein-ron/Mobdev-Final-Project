@@ -34,7 +34,13 @@ public class BudgetRepository {
                 .collect(Collectors.toList());
     }
 
-    public void delete(String id) throws Exception {
-        getDb().collection(COLLECTION).document(id).delete().get();
+    public void delete(String id, String userId) throws Exception {
+        var doc = getDb().collection(COLLECTION).document(id).get().get();
+        Budget budget = doc.toObject(Budget.class);
+        if (!doc.exists() || budget == null || !userId.equals(budget.getUserId())) {
+            throw new IllegalArgumentException("Budget not found");
+        }
+
+        doc.getReference().delete().get();
     }
 }

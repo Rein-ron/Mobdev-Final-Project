@@ -12,18 +12,22 @@ export default function Transactions() {
   const [category, setCategory] = useState("");
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchTransactions();
   }, []);
 
   const fetchTransactions = async () => {
-  try {
+    setIsLoading(true);
+    try {
       const data = await getTransactions();
       setTransactions(Array.isArray(data) ? data : []);
     } catch (error) {
-      setTransactions([]);
       Alert.alert('Error', 'Failed to load transactions');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,6 +45,7 @@ export default function Transactions() {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
+    setIsSaving(true);
     try {
       const today = new Date().toISOString().split('T')[0];
       await addTransaction({
@@ -58,6 +63,8 @@ export default function Transactions() {
       fetchTransactions();
     } catch (error) {
       Alert.alert('Error', 'Failed to add transaction');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -73,7 +80,10 @@ export default function Transactions() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? '#121824' : '#f4f7fb' }]}>
-        <Text style={[styles.title, { color: theme.text }]}>Transactions</Text>
+        <View style={styles.titleRow}>
+          <Text style={[styles.title, { color: theme.text }]}>Transactions</Text>
+          {isLoading && <Text style={[styles.refreshText, { color: theme.subText }]}>Refreshing...</Text>}
+        </View>
 
         <View style={styles.filterRow}>
           {['all', 'income', 'expense'].map(f => (
@@ -107,7 +117,9 @@ export default function Transactions() {
             ))
         ) : (
           <Card>
-            <Text style={[styles.muted, { color: theme.subText }]}>No transactions found</Text>
+            <Text style={[styles.muted, { color: theme.subText }]}>
+              {isLoading ? "Loading transactions..." : "No transactions found"}
+            </Text>
           </Card>
         )}
       </ScrollView>
@@ -162,8 +174,8 @@ export default function Transactions() {
               onChangeText={setDescription}
             />
 
-            <TouchableOpacity style={styles.submitBtn} onPress={handleAdd}>
-              <Text style={styles.submitText}>Add</Text>
+            <TouchableOpacity style={[styles.submitBtn, isSaving && styles.disabledBtn]} onPress={handleAdd} disabled={isSaving}>
+              <Text style={styles.submitText}>{isSaving ? "Adding..." : "Add"}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => setModalVisible(false)}>
@@ -178,7 +190,9 @@ export default function Transactions() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f4f7fb", padding: 16 },
-  title: { fontSize: 28, fontWeight: "bold", marginBottom: 12, color: "#1f2a44" },
+  titleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  title: { fontSize: 28, fontWeight: "bold", color: "#1f2a44" },
+  refreshText: { fontSize: 12, fontWeight: "600" },
   card: { backgroundColor: "#fff", borderRadius: 16, padding: 16, marginBottom: 12, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
   filterRow: { flexDirection: "row", justifyContent: "space-around", marginBottom: 15 },
   filter: { color: "#777", fontWeight: "600" },
@@ -205,6 +219,7 @@ const styles = StyleSheet.create({
   typeBtnTextActive: { color: "#fff" },
   input: { backgroundColor: "#f9f9f9", padding: 14, borderRadius: 10, marginBottom: 12, borderWidth: 1, borderColor: "#eee" },
   submitBtn: { backgroundColor: "#2a6fdb", padding: 15, borderRadius: 25, alignItems: "center", marginBottom: 10 },
+  disabledBtn: { opacity: 0.7 },
   submitText: { color: "#fff", fontWeight: "bold" },
   cancelText: { textAlign: "center", color: "#888", marginTop: 4 },
 });

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useFocusEffect } from "expo-router";
-import { getSummary, getTransactions, getBudgets, getSavingsGoals } from '../../src/api/api';
+import { getDashboard } from '../../src/api/api';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../config/firebaseConfig';
 import { useTheme } from '../../context/ThemeContext';
@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [budgets, setBudgets] = useState([]);
   const [savings, setSavings] = useState([]);
   const [userReady, setUserReady] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const isFetching = useRef(false);
 
   useEffect(() => {
@@ -26,21 +27,18 @@ const Dashboard = () => {
     if (isFetching.current) return;
 
     isFetching.current = true;
+    setIsRefreshing(true);
     try {
-      const [summaryData, txData, budgetData, savingsData] = await Promise.all([
-        getSummary(),
-        getTransactions(),
-        getBudgets(),
-        getSavingsGoals()
-      ]);
-      setSummary(summaryData ?? { income: 0, expenses: 0, balance: 0 });
-      setTransactions(Array.isArray(txData) ? txData : []);
-      setBudgets(Array.isArray(budgetData) ? budgetData : []);
-      setSavings(Array.isArray(savingsData) ? savingsData : []);
+      const dashboardData = await getDashboard();
+      setSummary(dashboardData.summary ?? { income: 0, expenses: 0, balance: 0 });
+      setTransactions(Array.isArray(dashboardData.transactions) ? dashboardData.transactions : []);
+      setBudgets(Array.isArray(dashboardData.budgets) ? dashboardData.budgets : []);
+      setSavings(Array.isArray(dashboardData.savings) ? dashboardData.savings : []);
     } catch (error) {
       console.log('fetchData error:', error.message);
     } finally {
       isFetching.current = false;
+      setIsRefreshing(false);
     }
   }, []);
 
@@ -66,7 +64,10 @@ const Dashboard = () => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: isDarkMode ? '#121824' : '#f4f7fb' }]}>
 
-      <Text style={[styles.title, { color: theme.text }]}>My Budget</Text>
+      <View style={styles.titleRow}>
+        <Text style={[styles.title, { color: theme.text }]}>My Budget</Text>
+        {isRefreshing && <Text style={[styles.refreshText, { color: theme.subText }]}>Refreshing...</Text>}
+      </View>
 
       <View style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>Total Balance</Text>
@@ -165,7 +166,9 @@ const Dashboard = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f4f7fb", padding: 16 },
-  title: { fontSize: 26, fontWeight: "bold", color: "#1f2a44", marginBottom: 16 },
+  titleRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
+  title: { fontSize: 26, fontWeight: "bold", color: "#1f2a44" },
+  refreshText: { fontSize: 12, fontWeight: "600" },
   balanceCard: { backgroundColor: "#1f2a44", borderRadius: 16, padding: 24, marginBottom: 16, alignItems: "center" },
   balanceLabel: { fontSize: 13, color: "#aaa", marginBottom: 8 },
   balanceAmount: { fontSize: 36, fontWeight: "bold", color: "#fff" },

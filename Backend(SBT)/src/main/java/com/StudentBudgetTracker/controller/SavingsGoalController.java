@@ -33,14 +33,18 @@ public class SavingsGoalController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Void> updateSaved(@PathVariable String id,
-                                            @RequestBody Map<String, Double> body) throws Exception {
-        service.updateSaved(id, body.get("saved"));
+                                            @RequestBody Map<String, Double> body,
+                                            HttpServletRequest request) throws Exception {
+        String userId = (String) request.getAttribute("uid");
+        service.updateSaved(id, userId, body.get("saved"));
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) throws Exception {
-        service.deleteSavingsGoal(id);
+    public ResponseEntity<Void> delete(@PathVariable String id,
+                                       HttpServletRequest request) throws Exception {
+        String userId = (String) request.getAttribute("uid");
+        service.deleteSavingsGoal(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

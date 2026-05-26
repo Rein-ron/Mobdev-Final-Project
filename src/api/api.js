@@ -37,12 +37,33 @@ const safeJson = async (res, fallback, endpoint) => {
   }
 };
 
+const ensureOk = async (res, endpoint) => {
+  if (res.ok) return;
+
+  const message = await res.text().catch(() => '');
+  console.log(`API request failed (${endpoint}): ${res.status} ${message}`);
+  throw new Error(message || `${endpoint} failed`);
+};
+
 export const getTransactions = async () => {
   const token = await getToken();
   const res = await fetch(`${BASE_URL}/transactions`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return safeJson(res, [], 'GET /transactions');
+};
+
+export const getDashboard = async () => {
+  const token = await getToken();
+  const res = await fetch(`${BASE_URL}/dashboard`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return safeJson(res, {
+    summary: { income: 0, expenses: 0, balance: 0 },
+    transactions: [],
+    budgets: [],
+    savings: [],
+  }, 'GET /dashboard');
 };
 
 export const addTransaction = async (transaction) => {
@@ -52,15 +73,17 @@ export const addTransaction = async (transaction) => {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(transaction),
   });
+  await ensureOk(res, 'POST /transactions');
   return res.text();
 };
 
 export const deleteTransaction = async (id) => {
   const token = await getToken();
-  await fetch(`${BASE_URL}/transactions/${id}`, {
+  const res = await fetch(`${BASE_URL}/transactions/${id}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
+  await ensureOk(res, 'DELETE /transactions');
 };
 
 export const getSummary = async () => {
@@ -86,6 +109,7 @@ export const addBudget = async (budget) => {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(budget),
   });
+  await ensureOk(res, 'POST /budgets');
   return res.text();
 };
 
@@ -104,14 +128,16 @@ export const addSavingsGoal = async (goal) => {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(goal),
   });
+  await ensureOk(res, 'POST /savings');
   return res.text();
 };
 
 export const updateSavingsGoal = async (id, newSaved) => {
   const token = await getToken();
-  await fetch(`${BASE_URL}/savings/${id}`, {
+  const res = await fetch(`${BASE_URL}/savings/${id}`, {
     method: 'PATCH',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ saved: newSaved }),
   });
+  await ensureOk(res, 'PATCH /savings');
 };

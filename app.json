@@ -34,8 +34,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "b907adce-a85e-4832-987b-6dad9358da6b"
+        "projectId": "3db58e5d-4dc9-467a-82d7-6af71a5e1b95"
       }
-    }
+    },
+    "owner": "reine123"
   }
 }

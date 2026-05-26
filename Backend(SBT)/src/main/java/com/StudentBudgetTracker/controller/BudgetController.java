@@ -31,8 +31,10 @@ public class BudgetController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) throws Exception {
-        service.deleteBudget(id);
+    public ResponseEntity<Void> delete(@PathVariable String id,
+                                       HttpServletRequest request) throws Exception {
+        String userId = (String) request.getAttribute("uid");
+        service.deleteBudget(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

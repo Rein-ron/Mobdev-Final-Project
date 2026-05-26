@@ -22,8 +22,8 @@ public class TransactionService {
         return repo.findByUserId(userId);
     }
 
-    public void deleteTransaction(String id) throws Exception {
-        repo.delete(id);
+    public void deleteTransaction(String id, String userId) throws Exception {
+        repo.delete(id, userId);
     }
 
     public Map<String, Double> getSummary(String userId) throws Exception {

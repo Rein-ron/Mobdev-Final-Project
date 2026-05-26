@@ -37,10 +37,13 @@ public class TransactionRepository {
             .collect(Collectors.toList());
     }
 
-    public void delete(String id) throws Exception {
-        getDb().collection(COLLECTION)
-            .document(id)
-            .delete()
-            .get();
+    public void delete(String id, String userId) throws Exception {
+        var doc = getDb().collection(COLLECTION).document(id).get().get();
+        Transaction transaction = doc.toObject(Transaction.class);
+        if (!doc.exists() || transaction == null || !userId.equals(transaction.getUserId())) {
+            throw new IllegalArgumentException("Transaction not found");
+        }
+
+        doc.getReference().delete().get();
     }
 }

@@ -21,7 +21,7 @@ public class BudgetService {
         return repo.findByUserId(userId);
     }
 
-    public void deleteBudget(String id) throws Exception {
-        repo.delete(id);
+    public void deleteBudget(String id, String userId) throws Exception {
+        repo.delete(id, userId);
     }
 }

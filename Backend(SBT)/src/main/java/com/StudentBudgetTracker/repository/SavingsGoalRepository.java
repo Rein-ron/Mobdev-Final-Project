@@ -34,12 +34,23 @@ public class SavingsGoalRepository {
                 .collect(Collectors.toList());
     }
 
-    public void update(String id, double newSaved) throws Exception {
-        getDb().collection(COLLECTION).document(id)
-                .update("saved", newSaved).get();
+    public void update(String id, String userId, double newSaved) throws Exception {
+        var doc = getDb().collection(COLLECTION).document(id).get().get();
+        SavingsGoal goal = doc.toObject(SavingsGoal.class);
+        if (!doc.exists() || goal == null || !userId.equals(goal.getUserId())) {
+            throw new IllegalArgumentException("Savings goal not found");
+        }
+
+        doc.getReference().update("saved", newSaved).get();
     }
 
-    public void delete(String id) throws Exception {
-        getDb().collection(COLLECTION).document(id).delete().get();
+    public void delete(String id, String userId) throws Exception {
+        var doc = getDb().collection(COLLECTION).document(id).get().get();
+        SavingsGoal goal = doc.toObject(SavingsGoal.class);
+        if (!doc.exists() || goal == null || !userId.equals(goal.getUserId())) {
+            throw new IllegalArgumentException("Savings goal not found");
+        }
+
+        doc.getReference().delete().get();
     }
 }
